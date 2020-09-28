@@ -1,0 +1,22 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+}
+
+javafx {
+    version = "15"
+    modules = [ 'javafx.controls' ]
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.openjfx:javafx-controls:15"
+    implementation "org.openjfx:javafx-fxml:15"
+}
+
+mainClassName  = 'DataProcessing.MainApplication'
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
