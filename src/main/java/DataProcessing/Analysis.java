@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.input.MouseButton;
 
 import java.util.*;
@@ -15,7 +16,7 @@ import static DataProcessing.MainApplication.*;
 
 public class Analysis {
 
-    public static void initAnalysis() {
+    public static void initAnalysis(Button buttonDistribution) {
         for (LineChart<Number, Number> graph : graphs) {
             graph.setOnMouseClicked((event) -> {
                 if (event.getButton() == MouseButton.PRIMARY) {
@@ -24,6 +25,20 @@ public class Analysis {
                     getStationary(graph);
                 }
             });
+        }
+        buttonDistribution.setOnMouseClicked((event) -> distribution(graphs));
+    }
+
+    public static void distribution(ArrayList<LineChart<Number, Number>> graphs) {
+        ArrayList<Integer> distr1 = new ArrayList<>(),
+                distr2 = new ArrayList<>();
+        ObservableList<XYChart.Data<Number, Number>> data1 = graphs.get(0).getData().get(0).getData(),
+                data2 = graphs.get(1).getData().get(0).getData();
+        for (XYChart.Data<Number, Number> point : data1) {
+            distr1.get((int) (Math.floor(point.getYValue().doubleValue())));
+        }
+        for (XYChart.Data<Number, Number> point : data2) {
+            distr2.get((int) (Math.floor(point.getYValue().doubleValue())));
         }
     }
 
@@ -110,9 +125,30 @@ public class Analysis {
         alert.showAndWait();
     }
 
+    static Double minInList(List<Double> list) {
+        Double min = list.get(0);
+        for (Double elem : list) {
+            if (elem < min) {
+                min = elem;
+            }
+        }
+        return min;
+    }
+
+    static Double maxInList(List<Double> list) {
+        Double max = list.get(0);
+        for (Double elem : list) {
+            if (elem > max) {
+                max = elem;
+            }
+        }
+        return max;
+    }
+
     static void getStationary(LineChart<Number, Number> graph) {
         ObservableList<XYChart.Data<Number, Number>> data = graph.getData().get(0).getData(),
                 range = FXCollections.observableArrayList();
+        double min = min(data), max = max(data);
         int intervals = Integer.parseInt(N.getText()) / 10, k = 0, interval = 1;
         List<Double> means = new ArrayList<>(),
                 dispersions = new ArrayList<>(),
@@ -134,26 +170,25 @@ public class Analysis {
                 dispStat = true,
                 rootStat = true,
                 meanDevStat = true;
-        for (int i = 1; i < means.size(); i++) {
-            if (Math.abs(means.get(i - 1) - means.get(i)) > means.get(i) * 0.01) {
-                meansStat = false;
-            }
-            if (Math.abs(dispersions.get(i - 1) - dispersions.get(i)) > dispersions.get(i) * 0.01) {
-                dispStat = false;
-            }
-            if (Math.abs(rootMeanSqs.get(i - 1) - rootMeanSqs.get(i)) > rootMeanSqs.get(i) * 0.01) {
-                rootStat = false;
-            }
-            if (Math.abs(meanDevs.get(i - 1) - meanDevs.get(i)) > meanDevs.get(i) * 0.01) {
-                meanDevStat = false;
-            }
+        double delta = 0.1;
+        if (Math.abs(maxInList(means) - minInList(means)) > (max - min) * delta) {
+            meansStat = false;
+        }
+        if (Math.abs(maxInList(dispersions) - minInList(dispersions)) > (max - min) * delta) {
+            dispStat = false;
+        }
+        if (Math.abs(maxInList(rootMeanSqs) - minInList(rootMeanSqs)) > (max - min) * delta) {
+            rootStat = false;
+        }
+        if (Math.abs(maxInList(meanDevs) - minInList(meanDevs)) > (max - min) * delta) {
+            meanDevStat = false;
         }
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText("Stationary info");
         alert.setContentText("Mean - " + (meansStat ? "Yes" : "No") +
-                "\nD - " + (dispStat ? "Yes" : "No")  +
-                "\nrootMeanSq - " + (rootStat ? "Yes" : "No")  +
-                "\nMeanDev - " + (meanDevStat ? "Yes" : "No") );
+                "\nD - " + (dispStat ? "Yes" : "No") +
+                "\nrootMeanSq - " + (rootStat ? "Yes" : "No") +
+                "\nMeanDev - " + (meanDevStat ? "Yes" : "No"));
         alert.showAndWait();
     }
 }

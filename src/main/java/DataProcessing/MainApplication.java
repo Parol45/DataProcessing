@@ -31,12 +31,13 @@ public class MainApplication extends Application {
     Button buttonExp = new Button("Draw");
     Button buttonRandom = new Button("Rand");
     Button buttonMyRandom = new Button("My rand");
+    Button buttonDistribution = new Button("Draw distr");
 
     @Override
     public void start(Stage stage) {
         Scene scene = new Scene(layout, 950, 600);
         initModelGraphs(layout, inputs, buttonLinear, buttonExp, buttonRandom, buttonMyRandom);
-        initAnalysis();
+        initAnalysis(buttonDistribution);
         stage.setScene(scene);
         stage.show();
     }
