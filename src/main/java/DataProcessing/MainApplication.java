@@ -26,16 +26,30 @@ public class MainApplication extends Application {
             new TextField("1"),
             new TextField("1"),
             new TextField("1"),
-            new TextField("0.1"));
+            new TextField("0.1"),
+            new TextField("0"),
+            new TextField("2"),
+            new TextField("100"));
     Button buttonLinear = new Button("Draw");
     Button buttonExp = new Button("Draw");
     Button buttonRandom = new Button("Rand");
     Button buttonMyRandom = new Button("My rand");
+    Button buttonAutoCorrelation = new Button("AutoCorrelation");
+    Button buttonCrossCorrelation = new Button("CrossCorrelation");
+    Button buttonShift= new Button("Shift");
+    Button buttonFixShift = new Button("Fix shift");
+    Button buttonEjaculation = new Button("Выброс");
+    Button buttonFixEjaculation = new Button("Fix Выброс");
+    Button buttonHarmonic = new Button("Harmonic");
+    Button buttonPolyHarmonic = new Button("Poly harmonic");
+    Button buttonSpectre = new Button("Spectrum");
 
     @Override
     public void start(Stage stage) {
         Scene scene = new Scene(layout, 950, 600);
-        initModelGraphs(layout, inputs, buttonLinear, buttonExp, buttonRandom, buttonMyRandom);
+        initModelGraphs(layout, inputs, buttonLinear, buttonExp, buttonRandom, buttonMyRandom, buttonAutoCorrelation,
+                buttonCrossCorrelation, buttonShift, buttonFixShift, buttonEjaculation, buttonFixEjaculation,
+                buttonHarmonic, buttonPolyHarmonic, buttonSpectre);
         initAnalysis();
         stage.setScene(scene);
         stage.show();

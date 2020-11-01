@@ -1,8 +1,6 @@
 package DataProcessing;
 
-import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
@@ -151,9 +149,130 @@ public class Analysis {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText("Stationary info");
         alert.setContentText("Mean - " + (meansStat ? "Yes" : "No") +
-                "\nD - " + (dispStat ? "Yes" : "No")  +
-                "\nrootMeanSq - " + (rootStat ? "Yes" : "No")  +
-                "\nMeanDev - " + (meanDevStat ? "Yes" : "No") );
+                "\nD - " + (dispStat ? "Yes" : "No") +
+                "\nrootMeanSq - " + (rootStat ? "Yes" : "No") +
+                "\nMeanDev - " + (meanDevStat ? "Yes" : "No"));
         alert.showAndWait();
+    }
+
+    static ObservableList<XYChart.Data<Number, Number>> autoCorrelation(LineChart<Number, Number> graph) {
+        ObservableList<XYChart.Data<Number, Number>> data = graph.getData().get(0).getData(),
+                result = FXCollections.observableArrayList();
+        double mean = mean(data),
+                divider = 0;
+        for (int i = 0; i < data.size(); i++) {
+            divider += Math.pow(data.get(i).getYValue().doubleValue() - mean, 2);
+        }
+
+        for (int funShift = 0; funShift < data.size(); funShift++) {
+            double accumulator = 0;
+            for (int i = 0; i < data.size() - funShift; i++) {
+                accumulator += (data.get(i).getYValue().doubleValue() - mean) *
+                        (data.get(i + funShift).getYValue().doubleValue() - mean);
+            }
+            result.add(new XYChart.Data<>(data.get(funShift).getXValue(), accumulator / divider));
+        }
+        return result;
+    }
+
+    static ObservableList<XYChart.Data<Number, Number>> crossCorrelation(LineChart<Number, Number> graph1, LineChart<Number, Number> graph2) {
+        ObservableList<XYChart.Data<Number, Number>> data1 = graph1.getData().get(0).getData(),
+                data2 = graph2.getData().get(0).getData(),
+                result = FXCollections.observableArrayList();
+        double mean1 = mean(data1),
+                mean2 = mean(data2),
+                divider, acc1 = 0, acc2 = 0;
+        for (int i = 0; i < data1.size(); i++) {
+            acc1 += Math.pow(data1.get(i).getYValue().doubleValue() - mean1, 2);
+            acc2 += Math.pow(data2.get(i).getYValue().doubleValue() - mean2, 2);
+        }
+        divider = Math.sqrt(acc1) * Math.sqrt(acc2);
+
+        for (int funShift = 0; funShift < data1.size(); funShift++) {
+            double accumulator = 0;
+            for (int i = 0; i < data1.size() - funShift; i++) {
+                accumulator += (data1.get(i).getYValue().doubleValue() - mean1) *
+                        (data2.get(i + funShift).getYValue().doubleValue() - mean2);
+            }
+            result.add(new XYChart.Data<>(data1.get(funShift).getXValue(), accumulator / divider));
+        }
+        return result;
+    }
+
+    static ObservableList<XYChart.Data<Number, Number>> shift(LineChart<Number, Number> graph, double shift)  {
+        ObservableList<XYChart.Data<Number, Number>> data = graph.getData().get(0).getData(),
+                result = FXCollections.observableArrayList();
+        for (int i = 0; i < data.size(); i++) {
+            result.add(new XYChart.Data<>(data.get(i).getXValue(), data.get(i).getYValue().doubleValue() + shift));
+        }
+        return result;
+    }
+
+    static ObservableList<XYChart.Data<Number, Number>> fixShift(LineChart<Number, Number> graph)  {
+        ObservableList<XYChart.Data<Number, Number>> data = graph.getData().get(0).getData(),
+                result = FXCollections.observableArrayList();
+        double mean = mean(data);
+        for (int i = 0; i < data.size(); i++) {
+            result.add(new XYChart.Data<>(data.get(i).getXValue(), data.get(i).getYValue().doubleValue() - mean));
+        }
+        return result;
+    }
+
+    static ObservableList<XYChart.Data<Number, Number>> ejaculation(LineChart<Number, Number> graph, int n) {
+        ObservableList<XYChart.Data<Number, Number>> data = graph.getData().get(0).getData(),
+                result = FXCollections.observableArrayList();
+        List<Integer> randoms = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            randoms.add((int)Math.floor(Math.random() * Integer.parseInt(N.getText())));
+        }
+        for (int i = 0; i < data.size(); i++) {
+            if (randoms.contains(i)) {
+                result.add(new XYChart.Data<>(data.get(i).getXValue(), data.get(i).getYValue().doubleValue() * 100));
+            } else {
+                result.add(new XYChart.Data<>(data.get(i).getXValue(), data.get(i).getYValue().doubleValue()));
+            }
+        }
+        return result;
+    }
+
+    static ObservableList<XYChart.Data<Number, Number>> fixEjaculation(LineChart<Number, Number> graph) {
+        ObservableList<XYChart.Data<Number, Number>> data = graph.getData().get(0).getData(),
+                result = FXCollections.observableArrayList();
+        for (int i = 0; i < data.size(); i++) {
+            double temp = data.get(i).getYValue().doubleValue();
+            if (temp < 0 || temp > Integer.parseInt(N.getText())) {
+                if (i != 0 && i != data.size() - 1) {
+                    result.add(new XYChart.Data<>(data.get(i).getXValue(), (data.get(i - 1).getYValue().doubleValue() +
+                            data.get(i + 1).getYValue().doubleValue())/2));
+                } else {
+                    if (i == 0) {
+                        result.add(new XYChart.Data<>(data.get(i).getXValue(), data.get(i + 1).getYValue().doubleValue()));
+                    } else {
+                        result.add(new XYChart.Data<>(data.get(i).getXValue(), data.get(i - 1).getYValue().doubleValue()));
+                    }
+                }
+            } else {
+                result.add(new XYChart.Data<>(data.get(i).getXValue(), data.get(i).getYValue().doubleValue()));
+            }
+        }
+        return result;
+    }
+
+    public static ObservableList<XYChart.Data<Number, Number>> spectre(LineChart<Number, Number> graph, double dt) {
+        ObservableList<XYChart.Data<Number, Number>> data = graph.getData().get(0).getData(),
+                result = FXCollections.observableArrayList();
+        double re = 0, im = 0;
+        for (int i = 0; i < data.size() / 2; i++) {
+            for (int j = 0; j < data.size(); j++) {
+                re += data.get(j).getYValue().doubleValue() *
+                        Math.cos(2 * Math.PI * dt * i * data.get(j).getXValue().doubleValue() / Double.parseDouble(N.getText()));
+                im += data.get(j).getYValue().doubleValue() *
+                        Math.sin(2 * Math.PI * dt * i * data.get(j).getXValue().doubleValue() / Double.parseDouble(N.getText()));
+            }
+            re /= Double.parseDouble(N.getText());
+            im /= Double.parseDouble(N.getText());
+            result.add(new XYChart.Data<>(data.get(i).getXValue(), Math.sqrt(Math.pow(re, 2) + Math.pow(im, 2))));
+        }
+        return result;
     }
 }
