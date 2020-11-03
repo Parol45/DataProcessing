@@ -34,6 +34,9 @@ public class MainApplication extends Application {
     Button buttonExp = new Button("Draw");
     Button buttonRandom = new Button("Rand");
     Button buttonMyRandom = new Button("My rand");
+    Button buttonDistribution = new Button("Distribution");
+
+
     Button buttonAutoCorrelation = new Button("AutoCorrelation");
     Button buttonCrossCorrelation = new Button("CrossCorrelation");
     Button buttonShift= new Button("Shift");
@@ -46,10 +49,11 @@ public class MainApplication extends Application {
 
     @Override
     public void start(Stage stage) {
+        //border pane
         Scene scene = new Scene(layout, 950, 600);
         initModelGraphs(layout, inputs, buttonLinear, buttonExp, buttonRandom, buttonMyRandom, buttonAutoCorrelation,
                 buttonCrossCorrelation, buttonShift, buttonFixShift, buttonEjaculation, buttonFixEjaculation,
-                buttonHarmonic, buttonPolyHarmonic, buttonSpectre);
+                buttonHarmonic, buttonPolyHarmonic, buttonSpectre, buttonDistribution);
         initAnalysis();
         stage.setScene(scene);
         stage.show();

@@ -14,7 +14,7 @@ import static DataProcessing.MainApplication.*;
 
 public class Analysis {
 
-    public static void initAnalysis(Button buttonDistribution) {
+    public static void initAnalysis() {
         for (LineChart<Number, Number> graph : graphs) {
             graph.setOnMouseClicked((event) -> {
                 if (event.getButton() == MouseButton.PRIMARY) {
@@ -23,20 +23,6 @@ public class Analysis {
                     getStationary(graph);
                 }
             });
-        }
-        buttonDistribution.setOnMouseClicked((event) -> distribution(graphs));
-    }
-
-    public static void distribution(ArrayList<LineChart<Number, Number>> graphs) {
-        ArrayList<Integer> distr1 = new ArrayList<>(),
-                distr2 = new ArrayList<>();
-        ObservableList<XYChart.Data<Number, Number>> data1 = graphs.get(0).getData().get(0).getData(),
-                data2 = graphs.get(1).getData().get(0).getData();
-        for (XYChart.Data<Number, Number> point : data1) {
-            distr1.get((int) (Math.floor(point.getYValue().doubleValue())));
-        }
-        for (XYChart.Data<Number, Number> point : data2) {
-            distr2.get((int) (Math.floor(point.getYValue().doubleValue())));
         }
     }
 
@@ -296,7 +282,7 @@ public class Analysis {
     public static ObservableList<XYChart.Data<Number, Number>> spectre(LineChart<Number, Number> graph, double dt) {
         ObservableList<XYChart.Data<Number, Number>> data = graph.getData().get(0).getData(),
                 result = FXCollections.observableArrayList();
-        double re = 0, im = 0;
+        double re = 0, im = 0, df = 1.0 / dt / Integer.parseInt(N.getText());
         for (int i = 0; i < data.size() / 2; i++) {
             for (int j = 0; j < data.size(); j++) {
                 re += data.get(j).getYValue().doubleValue() *
@@ -307,6 +293,20 @@ public class Analysis {
             re /= Double.parseDouble(N.getText());
             im /= Double.parseDouble(N.getText());
             result.add(new XYChart.Data<>(data.get(i).getXValue(), Math.sqrt(Math.pow(re, 2) + Math.pow(im, 2))));
+        }
+        return result;
+    }
+
+    public static ObservableList<XYChart.Data<Number, Number>> distribution(LineChart<Number, Number> graph) {
+        ObservableList<XYChart.Data<Number, Number>> data = graph.getData().get(0).getData(),
+                result = FXCollections.observableArrayList();
+        Integer n = Integer.parseInt(N.getText());
+        double[] f = new double[n];
+        for (XYChart.Data<Number, Number> point : data) {
+            f[(int)Math.floor(point.getYValue().doubleValue())] += 1;
+        }
+        for (int i = 0; i < f.length; i++) {
+            result.add(new XYChart.Data<>(i, f[i] / n));
         }
         return result;
     }

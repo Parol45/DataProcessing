@@ -5,9 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
@@ -36,7 +34,8 @@ public class Model {
                                        Button buttonRandom, Button buttonMyRandom, Button buttonAutoCorrelation,
                                        Button buttonCrossCorrelation, Button buttonShift, Button buttonFixShift,
                                        Button buttonEjaculation, Button buttonFixEjaculation,
-                                       Button buttonHarmonic, Button buttonPolyHarmonic, Button buttonSpectre) {
+                                       Button buttonHarmonic, Button buttonPolyHarmonic, Button buttonSpectre,
+                                       Button buttonDistr) {
         for (int i = 0; i < 4; i++) {
             LineChart<Number, Number> graph = new LineChart<>(new NumberAxis(), new NumberAxis());
             graph.setCreateSymbols(false);
@@ -46,12 +45,28 @@ public class Model {
         }
         VBox vbLinear = new VBox();
         VBox vbExp = new VBox();
+
+        Menu m = new Menu("Options");
+
+        MenuItem m1 = new MenuItem("Draw linear");
+        MenuItem m2 = new MenuItem("Draw exp");
+        MenuItem m3 = new MenuItem("menu item 3");
+
+        m.getItems().add(m1);
+        m.getItems().add(m2);
+        m.getItems().add(m3);
+
+        MenuBar mb = new MenuBar();
+
+        mb.getMenus().add(m);
+        VBox vb = new VBox(mb);
+
         vbExp.getChildren().addAll(new Label("N:"), N, new Label("a:"), inputs.get(0),
-                new Label("b:"), inputs.get(1), buttonExp, inputs.get(3), new Label("from:"),
+                new Label("b:"), inputs.get(1), inputs.get(3), new Label("from:"),
                 inputs.get(5), new Label("to:"), inputs.get(6), buttonAutoCorrelation, buttonCrossCorrelation,
-                buttonEjaculation, buttonFixEjaculation, buttonSpectre);
+                buttonEjaculation, buttonFixEjaculation, buttonSpectre, buttonDistr);
         vbLinear.getChildren().addAll(buttonRandom, buttonMyRandom, new Label("c:"), inputs.get(2),
-                new Label("d:"), inputs.get(3), buttonLinear, new Label("dt:"), inputs.get(4),
+                new Label("d:"), inputs.get(3), new Label("dt:"), inputs.get(4),
                 new Label("shift:"), inputs.get(7), buttonShift, buttonFixShift,
                 buttonHarmonic, buttonPolyHarmonic);
         layout.add(vbLinear, 2, 0);
@@ -92,6 +107,9 @@ public class Model {
         buttonSpectre.setOnMouseClicked((event) -> spectre(Integer.parseInt(inputs.get(5).getText()),
                 Integer.parseInt(inputs.get(6).getText()),
                 Double.parseDouble(inputs.get(4).getText())));
+
+        buttonDistr.setOnMouseClicked((event) -> distribution(Integer.parseInt(inputs.get(5).getText()),
+                Integer.parseInt(inputs.get(6).getText())));
     }
 
     public static void trend(int type, Double a, Double b, Double c, Double d, Double dt) {
@@ -200,8 +218,14 @@ public class Model {
     public static void spectre(int type0, int type1, Double dt) {
         LineChart<Number, Number> from = graphs.get(type0),
                 to = graphs.get(type1);
-        ObservableList<XYChart.Data<Number, Number>> r = Analysis.fixShift(from);
         to.getData().clear();
         to.getData().add(new XYChart.Series<>(Analysis.spectre(from, dt)));
+    }
+
+    public static void distribution(int type0, int type1) {
+        LineChart<Number, Number> from = graphs.get(type0),
+                to = graphs.get(type1);
+        to.getData().clear();
+        to.getData().add(new XYChart.Series<>(Analysis.distribution(from)));
     }
 }
